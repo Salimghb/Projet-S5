@@ -1,0 +1,15 @@
+$TTL	60000
+@		IN	SOA	dnscold.cold.net.	root.dnscold.cold.net. (
+			1 ; serial
+			28 ; refresh
+			14 ; retry
+			3600000 ; expire
+			60000 ; negative cache ttl
+			)
+@		IN	NS	dnscold.cold.net.
+@		IN	MX 5	smtp.cold.net.
+
+dnscold		IN	A	213.186.33.5
+imap		IN	A	213.186.33.5
+pop		IN	A	213.186.33.5
+smtp		IN	A	213.186.33.5

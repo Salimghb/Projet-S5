@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>Le protocole SimpleHex</title>
+<style type="text/css" media="all">
+#pied {
+    font-size: 80%;    
+    text-align: right;
+    font-style: italic;
+}
+
+.toc { 
+    font-size: 80%;
+    position: fixed;
+    top: 1em;
+    right: 1em;
+    width: 15em;
+    background-color: #eee;
+    margin: 0px;
+    padding: 0px 
+    -moz-border-radius: 0.6em;
+    border-radius: 0.6em;
+}      
+
+.toc ul {
+    list-style-type: none;
+    padding: 0em 1em;
+}
+
+.toc ul ul {
+    font-size: 90%;
+}
+
+#tour {
+    display: inline-block;
+    text-align: justify;
+    width: 60em;
+    padding: 2em;
+}
+
+body {
+	font: normal 12pt sans-serif;
+    line-height: 1.3em;
+	text-align: left;
+	margin: 3em;
+	padding: 2em;
+}
+
+#header h2 {
+    font-weight: normal;
+    font-style: italic;
+}
+
+#body h2 {
+    margin-top: 2em;
+    padding-bottom: 0.25em;
+}
+
+
+#body h3 {
+    margin-top: 2em;
+    padding-bottom: 0.25em;
+}
+
+#body h1 {
+    border-bottom: 1px solid black;
+    padding-bottom: 0.25em;
+	margin-top: 2em;
+}
+
+a {
+    color: #ee7700;
+    font-weight: bold;
+	text-decoration: none;
+}
+
+.toc a {
+    color: black;
+}
+
+blockquote {
+	margin-left: 5em;
+	margin-top:2em;
+	font-style:italic;
+}
+
+hr {
+	margin-top:3em;
+}
+
+pre {
+    padding: 1em;
+    background-color: #fce4cc;
+    -moz-border-radius: 0.6em;
+    border-radius: 0.6em;
+}
+</style>
+<style type="text/css" media="print">
+body {
+    font-size: 10pt
+}
+.toc, #pied {
+    display: none;
+}
+</style>
+</head>
+<body>
+<div id="tour">
+<div id="header">
+<h1>Le protocole SimpleHex</h1>
+<h2>A. Nonyme</h2>
+<h3>mai 2016</h3>
+</div>
+<div id="corps">
+<div class="body" id="body">
+
+<h1>Introduction</h1>
+
+<p>
+Le protocole SimpleHex est un protocole textuel pour le jeu de Hex qui permet à deux programmes de communiquer sur le déroulement d'une partie. Lorsqu'il est utilisé à travers un réseau TCP/IP, ce protocole est encapsulé dans une socket TCP ; les serveurs écoutent habituellement sur le port 6666.
+</p>
+<p>
+Le protocole est synchrone, constitué d'une séquence de messages échangés entre le client et le serveur. Chaque message est une ligne de texte UTF-8 terminée par le caractère de fin de ligne dans la convention Unix (LF, ASCII Linefeed, noté <code>'\n'</code> en Python).
+</p>
+<p>
+Une session du protocole débute par une phase d'initialisation. Elle est suivie de la partie proprement dite pendant laquelle les joueurs placent alternativement des pions. Elle se termine lorsqu'un joueur remporte la partie. La connexion est alors interrompue.
+</p>
+<p>
+Un certain nombre d'extensions au protocole peuvent être mises en œuvre. Les extensions gérées par le client et par le serveur sont annoncées lors de la phase d'initialisation. Seules les extensions gérées par les deux programmes sont utilisées lors d'une partie.
+</p>
+<p>
+Par convention, sauf extension particulière, le client joue en premier.
+</p>
+<p>
+Par convention, le client joue bleu, il doit connecter horizontalement. Le serveur joue rouge, il doit connecter verticalement.
+</p>
+<p>
+<img align="middle" src="board.png" border="0" alt=""/>
+</p>
+
+<h1>Phase 1 : Initialisation</h1>
+
+<p>
+En début de session, le client envoie un message constitué de la commande <code>bonjour</code> suivie de la liste des extensions gérées, séparées par des espaces. Le serveur répond par un message de même nature. Seules les extensions annoncées par chacun des programmes seront prises en compte pour la suite du protocole.
+</p>
+
+<pre>
+&gt;&gt;&gt; bonjour pileouface
+&lt;&lt;&lt; bonjour pileouface gateau
+</pre>
+
+<p>
+Puis, le client envoie un message constitué de la commande <code>joueur</code> suivie du nom du joueur qu'il représente. Le serveur répond par un message de même nature.
+</p>
+
+<pre>
+&gt;&gt;&gt; joueur Alice
+&lt;&lt;&lt; joueur Bob
+</pre>
+
+<p>
+Enfin, le client envoie un message constitué de la commande <code>tablier</code> suivie d'une liste des tailles de tabliers proposées, séparées par des espaces. Le serveur répond par un message constitué de la commande <code>tablier</code> suivie de l'unique taille choisie par le serveur parmi les propositions du client. Si le serveur ne trouve pas de taille qui lui convient, il envoie le message <code>dommage</code> et interrompt la connexion.
+</p>
+
+<pre>
+&gt;&gt;&gt; tablier 3 5 11
+&lt;&lt;&lt; tablier 11
+</pre>
+
+<h1>Phase 2 : Partie</h1>
+
+<p>
+Une fois l'initialisation terminée et le premier joueur déterminé, les joueurs placent alternativement leurs pions. Pour cela, ils envoient alternativement un message constitué de la commande <code>joue</code> suivie des coordonnées où placer le pion. Les coordonnées sont spécifiées au format alphanumérique constitué d'une lettre suivie d'un nombre (par exemple <code>F5</code>).
+</p>
+<p>
+Si un joueur détecte un problème (coordonnée non valide, coup illégal) il envoie un message constitué du mot-clé <code>oups</code> suivi d'un message informatif.
+</p>
+
+<pre>
+&gt;&gt;&gt; joue F5
+&lt;&lt;&lt; joue A1
+&gt;&gt;&gt; joue E2
+&lt;&lt;&lt; joue F5
+&gt;&gt;&gt; oups coup illégal !
+</pre>
+
+<h1>Phase 3 : Fin de partie</h1>
+
+<p>
+Lorsqu'un joueur gagne la partie, l'autre joueur envoie le message <code>bravo</code>. La connexion est interrompue après l'échange de messages <code>aurevoir</code>.
+</p>
+
+<pre>
+&lt;&lt;&lt; joue A1
+&gt;&gt;&gt; bravo
+&lt;&lt;&lt; aurevoir
+&gt;&gt;&gt; aurevoir
+</pre>
+
+<h1>Exemple de session</h1>
+
+<p>
+Voici une session observée en tant que client. Les caractères en début de ligne ne font pas partie de l'échange, ils indiquent qui du client (<code>&gt;&gt;&gt;</code>) ou du serveur (<code>&lt;&lt;&lt;</code>) envoie le message. Aucune extension n'est mise en œuvre car le serveur n'en gère aucune.
+</p>
+
+<pre>
+&gt;&gt;&gt; bonjour pileouface gateau
+&lt;&lt;&lt; bonjour
+&gt;&gt;&gt; joueur Alice
+&lt;&lt;&lt; joueur Bob
+&gt;&gt;&gt; tablier 11
+&lt;&lt;&lt; tablier 11
+&gt;&gt;&gt; joue B2
+&lt;&lt;&lt; joue F6
+&gt;&gt;&gt; joue C3
+&lt;&lt;&lt; joue G4
+&gt;&gt;&gt; joue F5
+...
+&gt;&gt;&gt; joue A10
+&lt;&lt;&lt; bravo
+&gt;&gt;&gt; aurevoir
+&lt;&lt;&lt; aurevoir
+</pre>
+
+<h1>Extensions</h1>
+
+<h2>pileouface</h2>
+
+<p>
+L'extension <code>pileouface</code> permet de déterminer au hasard et sans triche possible qui joue en premier. Pour cela, quatre messages commençant par la commande <code>pileouface</code> sont échangés à la fin de l'initialisation (après que la taille du tablier a été choisie), le client envoie le premier message.
+</p>
+<p>
+Le client choisit un mot au hasard (x) et un tirage (p) parmi <code>pile</code> et <code>face</code>. Le serveur choisit lui aussi un mot au hasard (y) et un tirage (t).
+</p>
+
+<ol>
+<li>Le client envoie le mot x au serveur.
+</li>
+<li>Le serveur envoie f(x,y,t) au client.
+</li>
+<li>Le client envoie son tirage p.
+</li>
+<li>Le serveur envoie y au client.
+</li>
+</ol>
+
+<p>
+Après ces échanges, le client et le serveur comparent t et p (directement ou en comparant f(x,y,t) et f(x,y,b)). Si le client a deviné le tirage du serveur c'est le client qui commence à jouer, sinon c'est le serveur.
+</p>
+<p>
+Dans ce protocole, si le serveur essaie de tricher, le client peut le détecter. Dans ce cas le client envoie le message <code>tricheur</code> au serveur et interrompt la connexion.
+</p>
+<p>
+Pour les mots au hasard, on pourra utiliser par exemple un UUID aléatoire : en Python <code>from uuid import uuid4</code> puis <code>str(uuid4())</code>.
+</p>
+<p>
+La fonction f(a,b,c) utilisée dans le protocole est obtenue en appliquant la fonction de hachage SHA256 sur la chaîne constituée de ses arguments séparés par des espaces et en notant la valeur obtenue en hexadécimal : en Python <code>from hashlib import sha256</code> puis <code>sha256(' '.join([a,b,c]).encode('utf8')).hexdigest()</code>
+</p>
+<p>
+Voici un exemple d'échange <code>pileouface</code> :
+</p>
+
+<pre>
+&gt;&gt;&gt; pileouface 16c9c543-5290-4eef-a3fe-4e0cd8ec96b5
+&lt;&lt;&lt; pileouface aafc18993dda2d939f48e44d54cb764a4a711b52f93c24e6475abf3350129540
+&gt;&gt;&gt; pileouface face
+&lt;&lt;&lt; pileouface 00b6591d-07a1-4a9e-8007-26898c4dc4d4
+</pre>
+
+<p>
+Et les calculs qui vont avec du point de vue du client :
+</p>
+
+<pre>
+x = 16c9c543-5290-4eef-a3fe-4e0cd8ec96b5
+f(x,y,t) = aafc18993dda2d939f48e44d54cb764a4a711b52f93c24e6475abf3350129540
+p = face
+y = 00b6591d-07a1-4a9e-8007-26898c4dc4d4
+f(x,y,p) = aafc18993dda2d939f48e44d54cb764a4a711b52f93c24e6475abf3350129540
+J'ai gagné car f(x,y,t)=f(x,y,p) !
+</pre>
+
+<p>
+Et les calculs qui vont avec du point de vue du serveur :
+</p>
+
+<pre>
+x = 16c9c543-5290-4eef-a3fe-4e0cd8ec96b5
+y = 00b6591d-07a1-4a9e-8007-26898c4dc4d4
+t = face
+f(x,y,t) = aafc18993dda2d939f48e44d54cb764a4a711b52f93c24e6475abf3350129540
+p = face
+J'ai perdu car t=p !
+</pre>
+
+<p>
+Le premier joueur sera donc le client dans cet exemple.
+</p>
+
+<h2>gateau</h2>
+
+<p>
+Au jeu de Hex, le premier joueur a une stratégie gagnante. Pour équilibrer ce biais, la règle du gâteau permet au second joueur d'échanger les rôles après le premier coup. Avec cette extension, la partie se déroule normalement mais après le premier coup, le second joueur a le choix entre deux possibilités :
+</p>
+
+<ol>
+<li>jouer normalement sur une case libre ;
+</li>
+<li>envoyer le message <code>gateau</code> pour indiquer qu'il devient le nouveau premier joueur et que le premier coup était le sien ; la partie se poursuit alors comme une partie normale.
+</li>
+</ol>
+
+<h2>message</h2>
+
+<p>
+Cette extension est plus délicate à mettre en œuvre car elle rend le protocole asynchrone.
+</p>
+<p>
+Avec cette extension, le client ou le serveur peut à tout moment envoyer un message qui commence par la commande <code>blabla</code> suivie d'un message à destination de l'autre joueur. Ces messages n'affectent pas le déroulement de la partie proprement dite.
+</p>
+
+<h1>Exemple de partie avec extensions</h1>
+
+<pre>
+&gt;&gt;&gt; bonjour pileouface gateau message
+&lt;&lt;&lt; bonjour pileouface gateau message
+&gt;&gt;&gt; joueur Alice
+&lt;&lt;&lt; joueur Bob
+&gt;&gt;&gt; tablier 3
+&lt;&lt;&lt; tablier 3
+&gt;&gt;&gt; pileouface 16c9c543-5290-4eef-a3fe-4e0cd8ec96b5
+&lt;&lt;&lt; pileouface aafc18993dda2d939f48e44d54cb764a4a711b52f93c24e6475abf3350129540
+&gt;&gt;&gt; pileouface pile
+&lt;&lt;&lt; pileouface 00b6591d-07a1-4a9e-8007-26898c4dc4d4
+&gt;&gt;&gt; blabla Bonjour !
+&lt;&lt;&lt; blabla Bonne partie !
+&gt;&gt;&gt; blabla Toi aussi :-)
+&lt;&lt;&lt; joue B2
+&gt;&gt;&gt; gateau
+&gt;&gt;&gt; blabla Héhé !
+&lt;&lt;&lt; joue C3
+&gt;&gt;&gt; joue C2
+&gt;&gt;&gt; blabla Niark niark...
+&lt;&lt;&lt; blabla Ca sent le sapin.
+&lt;&lt;&lt; joue A3
+&gt;&gt;&gt; joue A2
+&lt;&lt;&lt; bravo
+&lt;&lt;&lt; blabla Bien joué Alice !
+&gt;&gt;&gt; blabla Trop facile en 3x3...
+&gt;&gt;&gt; aurevoir
+&lt;&lt;&lt; aurevoir
+</pre>
+
+</div>
+<!-- xhtml code generated by txt2tags 2.6. (http://txt2tags.org) -->
+<!-- cmdline: txt2tags proto.t2t -->
+</div>
+<div id="pied">
+Dernière modification le 19 October 2016
+</div>
+</div>
+</body>
+</html>
+

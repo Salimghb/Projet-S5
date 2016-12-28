@@ -1,0 +1,8 @@
+chown bob:bob /home/bob
+chmod og-rwx /etc/exim4/exim4.conf
+ifconfig eth1 213.186.33.5/24
+ifconfig eth0 10.0.2.2/8
+/etc/init.d/quagga start
+/etc/init.d/bind start
+/etc/init.d/exim4 start
+/etc/init.d/inetd start
