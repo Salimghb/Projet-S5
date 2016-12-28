@@ -1,2 +1,0 @@
-#!/bin/sh
-vdump lana | wireshark -i - -k &
