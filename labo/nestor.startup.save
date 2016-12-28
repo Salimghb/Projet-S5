@@ -1,0 +1,12 @@
+### TODO : configurer l'adresse IP et la passerelle
+chown alice:alice /home/alice
+chmod og-rwx /etc/exim4/exim4.conf
+
+ifconfig eth0 42.10.11.12/8
+
+
+
+
+/etc/init.d/bind start
+/etc/init.d/exim4 start
+/etc/init.d/inetd start

@@ -1,0 +1,3 @@
+ifconfig eth0 10.66.66.66/8
+echo "nameserver 213.186.33.5" > /etc/resolv.conf
+/etc/init.d/quagga start

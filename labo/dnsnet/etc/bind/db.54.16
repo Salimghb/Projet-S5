@@ -1,0 +1,12 @@
+$TTL	60000
+@		IN	SOA	16.54.in-addr.arpa.	nobody.nowhere. (
+			1 ; serial
+			28 ; refresh
+			14 ; retry
+			3600000 ; expire
+			0 ; negative cache ttl
+			)
+@				IN	NS	54.64.16.54.in-addr.arpa.
+54.64.16.54.in-addr.arpa.	IN	A	54.16.64.54
+
+54.64	PTR	dnsnet.net.

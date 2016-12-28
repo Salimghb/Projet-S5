@@ -1,0 +1,87 @@
+Sujet du devoir de TP
+Réseaux L3
+2016/2017
+
+= Contexte =
+
+Alice vient de faire l'acquisition du domaine DNS estami.net ainsi que
+d'un bloc d'adresses IP pour être jointe à l'adresse mail 
+alice@estami.net. Elle dispose de trois machines qui forment un réseau
+local :
+ - alice est son poste de travail sur lequel le client de messagerie
+   pine a déjà été configuré (mot de passe "guest") ;
+ - nestor est son serveur DNS pour la zone estami.net, SMTP, POP et
+   IMAP pour la messagerie du domaine (déjà configurés) ;
+ - eve est son routeur qui fait l'interface avec son FAI.
+
+Il ne lui reste qu'à configurer les adresses IP de ces machines, ainsi
+qu'à terminer de configurer sa zone DNS... et vous allez l'aider !
+
+Bob (bob@cold.net) met sa machine bob, sur laquelle le client pine est
+configuré, à disposition pour tester le service de messagerie.
+
+
+= Travail à réaliser =
+
+Ce travail est à réaliser en binôme à l'aide des paramètres
+qui vous ont été communiqués via la page Celene du cours : un bloc
+d'adresses pour le réseau local d'Alice ainsi que l'adresse à utiliser
+pour la seconde interface du routeur eve. On prendra les paramètres 
+de l'un des membres du binôme.
+
+Dans un premier temps, il s'agit de terminer de configurer le lab
+en modifiant les fichiers suivants conformément aux indications TODO
+qui y figurent :
+  - alice.startup
+  - eve.startup
+  - dnsnet.startup
+  - nestor.startup
+  - nestor/etc/bind/db.net.estami
+
+Rq. il n'y a que des lignes à ajouter, aucune ligne existante n'est
+    à modifier ou à supprimer.
+
+Une fois que tout est correctement configuré, Alice doit pouvoir
+envoyer un mail à Bob à l'aide du client pine et Bob doit lui aussi
+pouvoir envoyer un mail à Alice (attention dans ce sens le DNS doit
+être correctement configuré).
+
+
+= Modalités de retour =
+
+Ce devoir est à déposer sur Celene, au plus tard le 7 janvier 2017 
+à 23h59 sous la forme d'une archive TAR compressée solution.tar.gz 
+contenant les fichiers suivants (et uniquement ceux-ci) :
+  - rapport.txt
+  - lana.cap
+  - lab/alice.startup
+  - lab/eve.startup
+  - lab/dnsnet.startup
+  - lab/nestor.startup
+  - lab/nestor/etc/bind/db.net.estami
+
+Les fichiers du répertoire lab sont les fichiers de configuration
+complétés permettant de reproduire l'expérience.
+
+Le fichier rapport.txt est un fichier texte expliquant la configuration
+choisie. Ce fichier devra reprendre en entête les noms des membres du
+groupe ainsi que le paramètres utilisés.
+
+Le fichier lana.cap est une preuve de bon fonctionnement obtenue de
+la manière suivante :
+ (1) redémarrer le lab proprement (si nécessaire lcrash + effacer les
+     fichiers .disk restant avant de lancer lstart) ;
+ (2) lancer wireshark pour une écoute sur le hub lana
+     (avec la commande $ vdump lana | wireshark -i - -k & ) ;
+ (3) depuis bob, envoyer un mail à alice@estami.net sans toucher à la
+     machine alice, le texte du mail doit contenir le nom des membres
+     du binôme suivi d'un poème de Charles Baudelaire ;
+ (4) depuis alice, utiliser le programme pine pour afficher le
+     message envoyé par Bob ;
+ (5) terminer l'enregistrement wireshark et sauvegarder la trace
+     dans le fichier lana.cap (au format pcap Wireshark/tcpdump) ;
+ (6) vérifier que tcpdump arrive bien à lire le contenu du fichier à
+     l'aide de la commande : tcpdump -r lana.cap -n 
+     cette commande doit afficher un résumé des échanges ARP, DNS, 
+     et SMTP.
+

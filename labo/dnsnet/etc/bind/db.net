@@ -1,0 +1,15 @@
+$TTL	60000
+@		IN	SOA	dnsnet.net.	root.dnsnet.net. (
+			1 ; serial
+			28 ; refresh
+			14 ; retry
+			3600000 ; expire
+			60000 ; negative cache ttl
+			)
+@		IN	NS	dnsnet.net.
+dnsnet		IN	A	54.16.64.54
+
+cold		IN	NS	dnscold.cold.net.
+dnscold.cold	IN	A	213.186.33.5
+
+estami		IN	NS	nestor.estami.net.

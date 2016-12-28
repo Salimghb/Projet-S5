@@ -1,0 +1,559 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+<title>Devoir de programmation réseaux</title>
+<style type="text/css" media="all">
+#pied {
+    font-size: 80%;    
+    text-align: right;
+    font-style: italic;
+}
+
+.toc { 
+    font-size: 80%;
+    position: fixed;
+    top: 1em;
+    right: 1em;
+    width: 15em;
+    background-color: #eee;
+    margin: 0px;
+    padding: 0px 
+    -moz-border-radius: 0.6em;
+    border-radius: 0.6em;
+}      
+
+.toc ul {
+    list-style-type: none;
+    padding: 0em 1em;
+}
+
+.toc ul ul {
+    font-size: 90%;
+}
+
+#tour {
+    display: inline-block;
+    text-align: justify;
+    width: 60em;
+    padding: 2em;
+}
+
+body {
+	font: normal 12pt sans-serif;
+    line-height: 1.3em;
+	text-align: left;
+	margin: 3em;
+	padding: 2em;
+}
+
+#header h2 {
+    font-weight: normal;
+    font-style: italic;
+}
+
+#body h2 {
+    margin-top: 2em;
+    padding-bottom: 0.25em;
+}
+
+
+#body h3 {
+    margin-top: 2em;
+    padding-bottom: 0.25em;
+}
+
+#body h1 {
+    border-bottom: 1px solid black;
+    padding-bottom: 0.25em;
+	margin-top: 2em;
+}
+
+a {
+    color: #ee7700;
+    font-weight: bold;
+	text-decoration: none;
+}
+
+.toc a {
+    color: black;
+}
+
+blockquote {
+	margin-left: 5em;
+	margin-top:2em;
+	font-style:italic;
+}
+
+hr {
+	margin-top:3em;
+}
+
+pre {
+    padding: 1em;
+    background-color: #fce4cc;
+    -moz-border-radius: 0.6em;
+    border-radius: 0.6em;
+    tab-size: 4;
+    -moz-tab-size: 4;
+}
+</style>
+<style type="text/css" media="print">
+body {
+    font-size: 10pt
+}
+.toc, #pied {
+    display: none;
+}
+</style>
+</head>
+<body>
+<div id="tour">
+<div id="header">
+<h1>Devoir de programmation réseaux</h1>
+<h2>Mathieu Liedloff - Nicolas Ollinger</h2>
+<h3>19 octobre 2016</h3>
+</div>
+<div id="corps">
+<div class="toc">
+</div>
+<div class="body" id="body">
+<p>
+Ce devoir propose d'implémenter un client puis un serveur pour le jeu de hex en Python 3.
+Pour cela vous avez à votre disposition:
+</p>
+
+<ul>
+<li>une spécification du protocole SimpleHex;
+</li>
+<li>le serveur <code>uomobile.univ-orleans.fr</code> (adresse IP <code>192.168.47.162</code>) en écoute sur le port 6666 et accessible
+depuis les machines du bâtiment 3ia;
+</li>
+<li>les sources du client graphique à compléter.
+</li>
+</ul>
+
+<p>
+Ce que vous devez rendre: le fichier <code>hexercice.py</code> complété avec vos solutions
+pour les activités 1 à 3 décrites ci-après. L'activité 0 n'est là que pour vous
+faire découvrir le protocole SimpleHex ainsi que les primitives Python pour manipuler les sockets.
+Nous vous recommandons de commencer par cette activité 0, même si aucun rendu n'est demandé
+pour cette activité.
+</p>
+
+<h1>Activité 0 : client textuel minimaliste</h1>
+
+<p>
+Après avoir lu attentivement la description du protocole SimpleHex,
+écrire un client textuel qui implémente (partiellement) le protocole SimpleHex.
+Il y a plusieurs étapes :
+</p>
+
+<ol>
+<li>établir une connexion au serveur (à l'adresse qui vous est donnée !) sur le port 6666;
+</li>
+<li>envoyer les quelques commandes pour l'initialisation  (<code>bonjour</code>, <code>joueur</code>, <code>tablier</code>);
+</li>
+<li>jouer quelques coups (<code>joue</code>);
+</li>
+<li>terminer la partie (<code>aurevoir</code>).
+</li>
+</ol>
+
+<p>
+Voici ci-après un exemple d'échanges que vous devez établir avec le serveur.
+Les lignes qui commencent par <code>&gt;&gt;&gt;</code> sont envoyées au serveur par le client;
+celles qui commencent par <code>&lt;&lt;&lt;</code> sont obtenues du serveur par le client.
+Les caractères (<code>&gt;&gt;&gt;</code> ou <code>&lt;&lt;&lt;</code>) en début de ligne ne font pas partie de l'échange.
+</p>
+<p>
+Les lignes commençant par <code>---</code> sont simplement affichées par le client sur sa sortie
+standard (via des <code>print</code>).
+</p>
+
+<pre>
+&gt;&gt;&gt; bonjour
+&lt;&lt;&lt; bonjour pileouface
+--- Nom du joueur ? Alice
+&gt;&gt;&gt; joueur Alice
+&lt;&lt;&lt; joueur Bob
+--- L'autre joueur s'appelle Bob
+&gt;&gt;&gt; tablier 4
+&lt;&lt;&lt; tablier 4
+--- Où jouer ? A1
+&gt;&gt;&gt; joue A1
+&lt;&lt;&lt; joue D1
+&gt;&gt;&gt; aurevoir
+&lt;&lt;&lt; aurevoir
+</pre>
+
+<p>
+Votre programme pourrait très vaguement ressembler à ceci:
+</p>
+
+<pre>
+from socket import socket
+
+s=socket()
+s.connect( ... )
+
+... bonjour ...
+
+nom = input("--- Nom du joueur ? ")
+s.send(...)
+print("&gt;&gt;&gt; %s" % nom)
+
+reponse = s.recv(1024).decode('utf-8')
+print("&lt;&lt;&lt; %s" % reponse)
+l=reponse.split(' ')
+print("--- L'autre joueur s'appelle "+l[1])
+
+... tablier, joue, aurevoir ...
+</pre>
+
+<h1>Activité 1 : client graphique</h1>
+
+<p>
+On met à disposition plusieurs fichiers pour un client graphique du jeu de Hex,
+seules deux fonctions sont à programmer. Elles sont dans <code>hexercice.py</code>
+et leurs en-têtes sont déjà écrites:
+</p>
+
+<ul>
+<li><b><code>CoupJoueur(gui, i, j)</code></b> est appelée à chaque fois que le joueur clique sur la cellule de coordonnées <code>(i,j)</code>.
+</li>
+<li><b><code>CoupAdversaire(gui)</code></b> doit écouter le socket et agir selon la commande envoyée par l'adversaire.
+</li>
+</ul>
+
+<p>
+Avant de détailler le fonctionnement que devraient avoir ces deux fonctions, voici quelques variables
+et fonctions utiles.
+</p>
+
+<h2>quelques variables</h2>
+
+<p>
+Dans ces deux fonctions, vous avez accès aux variables globales:
+</p>
+
+<ul>
+<li><b><code>hv.monTour</code></b>: booléen <code>True</code> si c'est au tour du joueur de jouer, <code>False</code> si c'est au tour de l'adversaire.
+Vous devez vous servir de ce booléen et le modifier pour le mettre à jour.
+</li>
+<li><b><code>hv.numJoueur</code></b>: entier, qui n'a pas à être modifié, dont la valeur a été initialisée à <code>2</code> pour le client et
+à <code>1</code> pour le serveur.
+</li>
+<li><b><code>hv.couleurs</code></b>: liste contenant <code>['white', 'red', 'blue']</code> et qui n'a pas à être modifiée.
+</li>
+</ul>
+
+<p>
+<i>Remarque technique (dont la lecture n'est pas indispensable).</i> Ces variables sont préfixées par <code>hv.</code> car elles ont été placées
+dans un module. C'est un choix de programmation qui n'est pas le plus élégant, le concept
+de classe aurait été avantageux ici mais nous souhaitions éviter l'utilisation excessive de <code>self</code>
+dans le code. Ce choix nous facilite la communication entre
+les fonctions qui ne sont pas exécutées par un même thread puisque notre programme
+a un comportement événementiel dû à l'interface graphique.
+Une autre possibilité aurait été d'utiliser explicitement des variables globales, ce
+que l'on évite habituellement. Le module cache ces variables globales sous le tapis.
+</p>
+
+<h2>quelques fonctions</h2>
+
+<p>
+Le protocole Hex manipule des coordonnées constituées d'une lettre suivie d'un nombre (par exemple <code>F5</code>).
+Notre programme représente ces coordonnées par un couple d'entiers. Par exemple <code>F5</code> correspond à <code>(4,1)</code>.
+Nous avons programmé deux petites fonctions dont nous vous laissons deviner leur comportement sur un exemple :
+</p>
+
+<pre>
+&gt;&gt;&gt; PlateauToTablierCoord(4,1)
+"F5"
+
+&gt;&gt;&gt; TablierToPlateauCoord("F5")
+(4,1)
+</pre>
+
+<p>
+Nous avons aussi à votre disposition deux autres fonctions fort utiles:
+</p>
+
+<ul>
+<li><b><code>CoupValide(i,j)</code></b> retourne <code>True</code> si et seulement si une position (i,j) est une position libre du tablier.
+</li>
+<li><b><code>JouerUnCoup(gui, i, j, numJoueur)</code></b> place un pion du joueur <code>numJoueur</code> sur la position <code>(i,j)</code> et met
+à jour l'interface graphique (appelée <code>gui</code>). Cette fonction retourne <code>True</code>
+si et seulement si en plaçant ce nouveau pion, le joueur vient de réaliser un chemin gagnant.
+</li>
+</ul>
+
+<h2>une version luxueuse de send et recv</h2>
+
+<p>
+Pour se simplifier le travail, nous n'utiliserons pas directement les fonctions <code>send</code> et <code>recv</code> 
+pour envoyer et lire dans un socket, mais les deux fonctions suivantes que nous avons déjà programmées
+dans le fichier <code>hexutils.py</code>:
+</p>
+
+<ul>
+<li><b><code>sendcmd(cmd,args)</code></b> envoie dans le socket la commande <code>cmd</code> suivie de ses arguments <code>args</code>.
+
+<pre>
+# pour envoyer "bonjour pileouface gateau" :
+&gt;&gt;&gt; sendcmd("bonjour", "pileouface gateau")
+</pre>
+
+<p></p>
+</li>
+<li><b><code>recvcmd(*pot)</code></b> lit dans le socket et retourne un couple <code>(cmd,args)</code> où
+<code>cmd</code> est l'une des commandes passées en argument à <code>recvcmd</code>,
+et où <code>args</code> sont les éventuels arguments de cette commande.
+(Pour information, le caractère <code>*</code> de <code>*pot</code> sert en Python à
+<i>décompacter</i> <code>pot</code> qui peut représenter plusieurs paramètres transmis à la fonction.)
+
+<pre>
+# si on attend de recevoir "joue F5" ou "aurevoir" :
+&gt;&gt;&gt; (cmd,co) = recvcmd("joue", "aurevoir")
+&gt;&gt;&gt; (cmd,co)
+("joue", "F5")
+</pre>
+
+</li>
+</ul>
+
+<h2>Première fonction à programmer : CoupJoueur(...)</h2>
+
+<pre>
+Si c'est à mon tour de jouer et que ce coup est valide (hv.monTour, CoupValide):
+	- calculer les coordonnées à envoyer (PlateauToTablierCoord)
+	- envoyer les coordonnées (sendcmd)
+	- jouer le coup (JouerUnCoup)
+	- ce n'est plus mon tour (hv.monTour)
+Sinon:
+	- éventuellement le signaler (print)
+</pre>
+
+<h2>Deuxième fonction à programmer : CoupAdversaire(...)</h2>
+
+<pre>
+lire le socket (recvcmd)
+Si la commande est "bravo", "oups" ou "aurevoir":
+	- lever une exception (raise)
+Sinon, si la commande est "joue":
+	- convertir les coordonnées lues (TablierToPlateauCoord)
+	- Si c'est au tour de l'adversaire et que le coup est valide (hv.monTour, CoupValide):
+		- jouer le coup et vérifier s'il est gagnant (JouerUnCoup)
+		- S'il est gagnant, envoyer "bravo" (sendcmd)
+		- ce n'est plus au tour de l'adversaire (hv.monTour)
+	- Sinon:
+		- éventuellement le signaler (print, oups)
+</pre>
+
+<h1>Activité 2 : programmer le serveur</h1>
+
+<p>
+Dans cette deuxième activité, nous vous proposons de compléter le code afin que
+qu'il puisse agir comme serveur.
+Jusqu'à présent, votre client se connectait au serveur mis à votre disposition
+et qui faisait appel à une *intelligence artificielle*. On ne cherchera pas à développer
+une telle intelligence, mais simplement à ce que deux joueurs *humains* puissent jouer l'un
+contre l'autre au jeu de hex.
+</p>
+<p>
+Pour cela, inspirez-vous de la fonction <code>initClient</code> pour programmer la fonction <code>initServeur</code>. Vous aurez besoin
+des fonctions <code>bind</code>, <code>listen</code>, <code>accept</code>. Le reste ressemble à <code>initClient</code> et est une question d'ordre
+dans les commandes.
+</p>
+
+<h1>Activité 3 : supporter l'extension pileouface</h1>
+
+<p>
+La dernière étape de ce devoir s'intéresse au support de l'extension <code>pileouface</code>
+(les extensions <code>gateau</code> et <code>message</code> décrites dans le protocole SimpleHex ne sont pas demandées).
+</p>
+<p>
+Pour implémenter l'extension <code>pileouface</code>, il suffit de modifier <code>initClient</code>
+et <code>initServeur</code>. On rappelle l'utilité des fonctions qui suivent.
+</p>
+<p>
+Pour les mots au hasard, on pourra utiliser par exemple un UUID aléatoire :
+<b><code>from uuid import uuid4</code></b> puis <b><code>str(uuid4())</code></b>.
+</p>
+<p>
+La fonction f(a,b,c) utilisée dans le protocole est obtenue en appliquant la fonction de hachage SHA256
+sur la chaîne constituée de ses arguments séparés par des espaces et en notant la valeur
+obtenue en hexadécimal :
+<b><code>from hashlib import sha256</code></b> puis <b><code>sha256(' '.join([a,b,c]).encode('utf8')).hexdigest()</code></b>
+</p>
+<p>
+Pour tirer aléatoirement la valeur 0 ou 1 : <b><code>from random import randint</code></b> puis <b><code>randint(0,1)</code></b>
+</p>
+
+<h1>Rappel de quelques notions</h1>
+
+<ul>
+<li><b>Adresse IP.</b> Identifiant numérique unique attribué à chaque machine connectée à un réseau IP.
+</li>
+<li><b>Masque réseau.</b> Détermine les deux parties d'une adresse IP : le préfixe correspondant au numéro du sous-réseau et le suffixe correspondant au numéro de l'hôte.
+</li>
+<li><b>DNS.</b> Service qui permet, entre autre, de traduire un nom de domaine (<a href="http://www.perdu.com">www.perdu.com</a>) en une adresse IP (208.97.177.124).
+</li>
+<li><b>Port.</b> Nombre (de 0 à 65535) qui distingue différentes connexions à une même machine. Par exemple, un serveur http écoute classiquement sur le port 80.
+</li>
+<li><b>Socket.</b> Interface de connexion qui permet à des processus de communiquer, notamment à travers un réseau.
+</li>
+</ul>
+
+<h1>Éléments de programmation réseau en Python 3</h1>
+
+<p>
+Un socket est une interface de connexion qui permet à des processus de communiquer,
+notamment à travers un réseau TCP/IP.
+</p>
+<p>
+Il existe deux modes de communication :
+</p>
+
+<ul>
+<li>connecté : le protocole TCP est utilisé et une communication durable est établie, ce qui permet plusieurs échanges.
+</li>
+<li>non connecté : le protocole UDP est utilisé et la communication ne dure que le temps d'envoyer les données, la communication est ensuite coupée.
+</li>
+</ul>
+
+<p>
+Nous utiliserons dans la suite un socket connecté.
+</p>
+
+<h2>Créer un socket</h2>
+
+<p>
+On commence par créer un socket et définir quelques options :
+</p>
+
+<pre>
+from socket import socket, SOL_SOCKET, SO_REUSEADDR
+
+s = socket()
+s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+</pre>
+
+<p>
+La dernière ligne définit l'option <code>SO_REUSEADDR</code> qui autorise la réutilisation d'un port
+immédiatement après la fermeture du socket (sinon, il y a un temps de latence, qui peut
+parfois retourner une erreur <code>Address already in use</code> lors de la mise au point du code).
+</p>
+
+<h2>Établir une connexion</h2>
+
+<h3>Côté serveur : attendre une connexion sur le socket</h3>
+
+<p>
+Le socket doit être lié à un port sur lequel se fera l'écoute.
+La fonction <code>bind</code> attend en paramètre une paire constituée d'une adresse IP servant à filtrer
+les clients autorisés à se connecter (<code>0.0.0.0</code> si on ne filtre pas) et du numéro de port
+à réserver.
+La fonction <code>listen</code> attend en paramètre le nombre maximum
+de connexions <u>en attente</u> dans la queue de réception, avant acceptation par le serveur.
+</p>
+<p>
+Ensuite, chaque appel à la fonction <code>accept</code> attend la connexion d'un client et retourne
+un nouveau socket connecté au client ainsi que l'adresse du client.
+</p>
+
+<pre>
+# lier l'interface par défaut sur le port 6666
+s.bind(('0.0.0.0',6666))
+s.listen(1)
+
+sc, addr = s.accept()
+</pre>
+
+<p>
+(<i>Note:</i> pour la programmation d'un serveur pouvant gérer plusieurs clients simultanément,
+on se tournera vers le module <a href="https://docs.python.org/3.5/library/select.html#select.select"><code>select</code></a>.)
+</p>
+
+<h3>Côté client : connecter le socket</h3>
+
+<p>
+Une fois le socket créé sur le client, nous pouvons le connecter à une adresse IP et un port,
+sur un serveur en attente d'une connexion.
+</p>
+
+<pre>
+# connexion sur la machine 127.0.0.1 (localhost) sur le port 6666
+s.connect(('127.0.0.1',6666))
+</pre>
+
+<p>
+<i>remarque.</i> La fonction <code>gethostbyname</code> peut être utilisée pour obtenir
+l'adresse IP d'un nom d'hôte. Par exemple, <code>gethostbyname("localhost")</code>
+retourne <code>127.0.0.1</code>.
+</p>
+
+<h2>Utiliser un socket</h2>
+
+<p>
+Le socket est connecté, il n'y a plus qu'à envoyer ou recevoir des données. Celles-ci doivent être codées sous forme de <code>bytes</code>. La conversion entre les chaînes de texte <code>utf-8</code> et les <code>bytes</code> se réalise à l'aide des fonctions <code>encode</code> et <code>decode</code> : <code>send(msg.encode('utf-8'))</code> ou <code>recv(1024).decode('utf-8')</code>.
+</p>
+
+<h3>envoyer à un bout</h3>
+
+<pre>
+msg = "bonjour\n"
+buf = msg.encode('utf-8')
+c.send(buf)
+</pre>
+
+<h3>recevoir à l'autre bout</h3>
+
+<pre>
+data = s.recv(1024)
+msg = data.decode('utf-8')
+</pre>
+
+<p>
+<i>remarque.</i> La fonction <code>recv</code> est bloquante : tant qu'elle ne reçoit rien, elle attend.
+</p>
+
+<h2>Déconnecter un socket</h2>
+
+<pre>
+s.close()
+</pre>
+
+<h1>Quelques liens</h1>
+
+<p>
+Liens utiles lorsque vous aurez une connexion internet complète :
+</p>
+
+<ul>
+<li><a href="https://docs.python.org/3.5/library/socket.html">doc sur le module <code>socket</code></a>
+</li>
+<li><a href="https://docs.python.org/3.5/howto/sockets.html">socket programming HowTo</a>
+</li>
+<li><a href="https://docs.python.org/3.5/library/select.html">doc sur le module <code>select</code></a>
+</li>
+<li><a href="https://openclassrooms.com/courses/apprenez-a-programmer-en-python/le-reseau">programmation réseau en python sur openclassrooms</a>
+</li>
+<li><a href="https://www.ietf.org/rfc.html">les RFC</a>
+</li>
+</ul>
+
+<hr class="light" />
+
+</div>
+<!-- xhtml code generated by txt2tags 2.6. (http://txt2tags.org) -->
+<!-- cmdline: txt2tags hexercice.t2t -->
+</div>
+<div id="pied">
+Dernière modification le 19 October 2016
+</div>
+</div>
+</body>
+</html>
+
