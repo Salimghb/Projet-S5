@@ -1,3 +1,13 @@
 Réalisation du projet : Salim Ghbabra
 
-Configuration du lab : 
+Configuration utilisée : 
+
+Bloc d'adresses pour le réseau local d'Alice : 172.24.0.0/13
+Adresse de la seconde interface du routeur eve : 42.219.102.184/8
+
+Choix des adresses IP : 
+
+Alice : 172.24.0.1/13
+Nestor : 172.31.255.254/13
+Eve eth0 (Réseau d'Alice) : 172.24.0.2/13
+Eve eth1 (Réseau FAI) : 42.219.102.184/8
