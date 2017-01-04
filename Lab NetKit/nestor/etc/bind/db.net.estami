@@ -14,7 +14,6 @@ $TTL	60000
 @		IN	NS	nestor.estami.net.
 @		IN 	MX 5 	smtp.estami.net.
 
-nestor		IN 	A	172.31.255.254
 imap		IN 	A 	172.31.255.254
 smtp		IN 	A 	172.31.255.254
 pop		IN 	A	172.31.255.254
