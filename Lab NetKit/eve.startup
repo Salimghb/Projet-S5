@@ -19,7 +19,4 @@ ifconfig eth1 42.219.102.184/8
 
 
 
-
-
-
 /etc/init.d/quagga start
